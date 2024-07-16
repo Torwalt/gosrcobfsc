@@ -1,7 +1,7 @@
 package main
 
 import (
-	"gosrcobfsc/obfusc"
+	"github.com/Torwalt/gosrcobfsc/obfuscating"
 	"log"
 )
 
@@ -17,7 +17,7 @@ func main() {
 }
 
 func run(content string) error {
-	out, err := obfusc.Obfuscate(content)
+	out, err := obfuscating.Obfuscate(content)
 	if err != nil {
 		return err
 	}

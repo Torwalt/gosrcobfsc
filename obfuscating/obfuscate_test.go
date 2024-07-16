@@ -1,7 +1,7 @@
-package obfusc_test
+package obfuscating_test
 
 import (
-	"gosrcobfsc/obfusc"
+	"github.com/Torwalt/gosrcobfsc/obfuscating"
 	"testing"
 
 	"github.com/stretchr/testify/require"
@@ -19,10 +19,7 @@ func aFunction(in string) int {
 `
 
 func TestObfuscate(t *testing.T) {
-	// fileContent, err := os.ReadFile("./testfile.go.test")
-	// require.NoError(t, err)
-
-	obfuscated, err := obfusc.Obfuscate(string(file), 1337)
+	obfuscated, err := obfuscating.Obfuscate(string(file))
 	require.NoError(t, err)
 	require.NotEmpty(t, obfuscated)
 }

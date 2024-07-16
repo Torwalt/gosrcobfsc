@@ -1,4 +1,4 @@
-module gosrcobfsc
+module github.com/Torwalt/gosrcobfsc
 
 go 1.22.4
 

@@ -1,4 +1,4 @@
-package obfusc
+package obfuscating
 
 import (
 	"go/ast"
