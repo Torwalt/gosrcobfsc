@@ -1,0 +1,8 @@
+package main
+
+import "fmt"
+
+func aFunction(in string) int {
+	fmt.Println(in)
+	return 0
+}
