@@ -1,16 +1,44 @@
 package obfuscating
 
 import (
+	"bytes"
 	"go/ast"
+	"go/format"
 	"go/parser"
 	"go/token"
-	"strings"
 )
 
 /*
 Goal: Collect all "user named" tokens, rename them and output same structure.
 
 https://eli.thegreenplace.net/2021/rewriting-go-source-code-with-ast-tooling/
+*/
+
+/*
+
+Hard part: module package must be renamed, too, but external packages cannot be renamed.
+Super hard part: What if code has custom private packages imported??
+
+*/
+
+type Args struct {
+	// The module name, e.g. for this repo github.com/Torwalt/gosrcobfsc. We
+	// need this to identify import paths and pkg names that must be changed.
+	// Import paths of external pkgs must not be touched.
+	ModuleName string
+	// Full file path to the to be obfuscated repo.
+	Source string
+	// Directory where the new repo should be created.
+	Sink string
+}
+
+/*
+TODO:
+- pkg and directory renaming
+- lookup of packages and their paths to change imports
+- args controlling
+- writing resulting repo
+- walking a whole repo not just file
 */
 
 func Obfuscate(content string) (string, error) {
@@ -21,34 +49,18 @@ func Obfuscate(content string) (string, error) {
 		return "", err
 	}
 
-	v := newVisitor(fset)
+	v := NewVisitor(fset)
 	ast.Walk(v, f)
 
-	return strings.Join(v.funcs, ","), nil
-}
-
-type Visitor struct {
-	fset  *token.FileSet
-	funcs []string
-}
-
-func newVisitor(fs *token.FileSet) *Visitor {
-	return &Visitor{
-		fset: fs,
-	}
-}
-
-func (v *Visitor) Visit(n ast.Node) ast.Visitor {
-	if n == nil {
-		return nil
+	b := bytes.NewBufferString("")
+	if err := format.Node(b, fset, f); err != nil {
+		return "", err
 	}
 
-	// Lets start by finding functions and printing their name.
+	return b.String(), nil
+}
 
-	switch t := n.(type) {
-	case *ast.FuncDecl:
-		v.funcs = append(v.funcs, t.Name.Name)
-	}
-
-	return v
+type Package struct {
+	name     string
+	fullPath string
 }
