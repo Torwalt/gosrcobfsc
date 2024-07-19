@@ -1,12 +1,14 @@
 package obfuscating
 
 import (
-	"bytes"
 	"go/ast"
-	"go/format"
-	"go/parser"
-	"go/token"
 )
+
+// "bytes"
+// "go/ast"
+// "go/format"
+// "go/parser"
+// "go/token"
 
 /*
 Goal: Collect all "user named" tokens, rename them and output same structure.
@@ -21,17 +23,6 @@ Super hard part: What if code has custom private packages imported??
 
 */
 
-type Args struct {
-	// The module name, e.g. for this repo github.com/Torwalt/gosrcobfsc. We
-	// need this to identify import paths and pkg names that must be changed.
-	// Import paths of external pkgs must not be touched.
-	ModuleName string
-	// Full file path to the to be obfuscated repo.
-	Source string
-	// Directory where the new repo should be created.
-	Sink string
-}
-
 /*
 TODO:
 - pkg and directory renaming
@@ -41,26 +32,44 @@ TODO:
 - walking a whole repo not just file
 */
 
-func Obfuscate(content string) (string, error) {
-	fset := token.NewFileSet()
-
-	f, err := parser.ParseFile(fset, "", content, 0)
+func Obfuscate(args Args) error {
+	dirs, err := CollectDirs(args.Source)
 	if err != nil {
-		return "", err
+		return err
 	}
 
-	v := NewVisitor(fset)
-	ast.Walk(v, f)
-
-	b := bytes.NewBufferString("")
-	if err := format.Node(b, fset, f); err != nil {
-		return "", err
+	repo, err := NewRepository(dirs)
+	if err != nil {
+		return err
 	}
 
-	return b.String(), nil
-}
+	nsSet := []NamedSymbols{}
+	for _, pkgs := range repo {
+		for _, pkg := range pkgs.pkgMap {
+			v := NewVisitor()
+			ast.Walk(v, pkg)
+			nsSet = append(nsSet, v.NamedSymbols())
+		}
+	}
 
-type Package struct {
-	name     string
-	fullPath string
+	// Obfuscate every user defined symbol in nsSet.
+	// Create Identical dir structure in sink.
+	// Write obfuscated fset.
+
+	// f, err := parser.ParseFile(fset, "", content, 0)
+	// if err != nil {
+	// 	return "", err
+	// }
+	//
+	// v := NewVisitor(fset)
+	// ast.Walk(v, f)
+	//
+	// b := bytes.NewBufferString("")
+	// if err := format.Node(b, fset, f); err != nil {
+	// 	return "", err
+	// }
+	//
+	// return b.String(), nil
+
+	return nil
 }

@@ -2,18 +2,23 @@ package obfuscating
 
 import (
 	"go/ast"
-	"go/token"
 )
 
-type Visitor struct {
-	fset *token.FileSet
+type NamedSymbols struct {
+	Funcs    []*ast.FuncDecl
+	Fields   []*ast.Field
+	Comments []*ast.Comment
+	Vals     []*ast.ValueSpec
+	Imports  []*ast.ImportSpec
+	Types    []*ast.TypeSpec
+}
 
+type Visitor struct {
 	ns NamedSymbols
 }
 
-func NewVisitor(fs *token.FileSet) *Visitor {
+func NewVisitor() *Visitor {
 	return &Visitor{
-		fset: fs,
 		ns: NamedSymbols{
 			Funcs:    []*ast.FuncDecl{},
 			Fields:   []*ast.Field{},
@@ -48,7 +53,6 @@ func (v *Visitor) Visit(n ast.Node) ast.Visitor {
 	case *ast.TypeSpec:
 		v.ns.Types = append(v.ns.Types, t)
 	default:
-		print("asd")
 		// For debugging right now.
 	}
 

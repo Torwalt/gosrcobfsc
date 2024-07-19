@@ -1,23 +1,28 @@
 package main
 
 import (
-	"github.com/Torwalt/gosrcobfsc/obfuscating"
+	"flag"
 	"log"
+
+	"github.com/Torwalt/gosrcobfsc/obfuscating"
 )
 
 func main() {
-	// TODO
-	// - Accept args
-	// - Read file
-	fileContent := ""
+	moduleNameFlag := flag.String("moduleName", "", "The name of the module (top of go.mod).")
+	sourceFlag := flag.String("source", "", "The full path of the source repository.")
+	sinkFlag := flag.String("sink", "", "The full path where to write obfuscated directory.")
+	args, err := obfuscating.NewArgs(moduleNameFlag, sourceFlag, sinkFlag)
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
 
-	if err := run(fileContent); err != nil {
+	if err := run(args); err != nil {
 		log.Fatalf("%v", err)
 	}
 }
 
-func run(content string) error {
-	out, err := obfuscating.Obfuscate(content)
+func run(args obfuscating.Args) error {
+	out, err := obfuscating.Obfuscate(args)
 	if err != nil {
 		return err
 	}

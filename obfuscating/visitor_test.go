@@ -50,7 +50,7 @@ func TestVisit(t *testing.T) {
 	f, err := parser.ParseFile(fset, "", content, 0)
 	require.NoError(t, err)
 
-	v := obfuscating.NewVisitor(fset)
+	v := obfuscating.NewVisitor()
 	ast.Walk(v, f)
 
 	ns := v.NamedSymbols()
