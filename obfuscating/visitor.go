@@ -5,13 +5,6 @@ import (
 	"go/token"
 )
 
-type NamedSymbols struct {
-	Funcs    []*ast.FuncDecl
-	Fields   []*ast.Field
-	Comments []*ast.Comment
-	Vals     []*ast.ValueSpec
-}
-
 type Visitor struct {
 	fset *token.FileSet
 
@@ -26,6 +19,8 @@ func NewVisitor(fs *token.FileSet) *Visitor {
 			Fields:   []*ast.Field{},
 			Comments: []*ast.Comment{},
 			Vals:     []*ast.ValueSpec{},
+			Imports:  []*ast.ImportSpec{},
+			Types:    []*ast.TypeSpec{},
 		},
 	}
 }
@@ -48,7 +43,12 @@ func (v *Visitor) Visit(n ast.Node) ast.Visitor {
 		v.ns.Comments = append(v.ns.Comments, t)
 	case *ast.ValueSpec:
 		v.ns.Vals = append(v.ns.Vals, t)
+	case *ast.ImportSpec:
+		v.ns.Imports = append(v.ns.Imports, t)
+	case *ast.TypeSpec:
+		v.ns.Types = append(v.ns.Types, t)
 	default:
+		print("asd")
 		// For debugging right now.
 	}
 

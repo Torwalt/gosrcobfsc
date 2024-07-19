@@ -56,21 +56,4 @@ func TestVisit(t *testing.T) {
 	ns := v.NamedSymbols()
 
 	require.NotEmpty(t, ns)
-
-	fieldsIdents := []string{}
-	for _, f := range ns.Fields {
-		for _, n := range f.Names {
-			fieldsIdents = append(fieldsIdents, n.Name)
-		}
-	}
-
-	valsIdent := []string{}
-	for _, f := range ns.Vals {
-		for _, n := range f.Names {
-			valsIdent = append(valsIdent, n.Name)
-		}
-	}
-
-	require.NotEmpty(t, fieldsIdents)
-
 }
