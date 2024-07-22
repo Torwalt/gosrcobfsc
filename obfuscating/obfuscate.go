@@ -32,23 +32,31 @@ TODO:
 - walking a whole repo not just file
 */
 
-func Obfuscate(args Args) error {
+type Obfuscated struct {
+	Pkg Package
+	Ns  NamedSymbols
+}
+
+func Obfuscate(args Args) ([]Obfuscated, error) {
 	dirs, err := CollectDirs(args.Source)
 	if err != nil {
-		return err
+		return []Obfuscated{}, err
 	}
 
 	repo, err := NewRepository(dirs)
 	if err != nil {
-		return err
+		return []Obfuscated{}, err
 	}
 
-	nsSet := []NamedSymbols{}
+	obf := []Obfuscated{}
 	for _, pkgs := range repo {
 		for _, pkg := range pkgs.pkgMap {
 			v := NewVisitor()
 			ast.Walk(v, pkg)
-			nsSet = append(nsSet, v.NamedSymbols())
+			obf = append(obf, Obfuscated{
+				Pkg: pkgs,
+				Ns:  v.NamedSymbols(),
+			})
 		}
 	}
 
@@ -71,5 +79,5 @@ func Obfuscate(args Args) error {
 	//
 	// return b.String(), nil
 
-	return nil
+	return obf, nil
 }

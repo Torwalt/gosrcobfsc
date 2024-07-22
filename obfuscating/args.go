@@ -1,6 +1,10 @@
 package obfuscating
 
-import "errors"
+import (
+	"errors"
+	"path/filepath"
+	"strings"
+)
 
 type Args struct {
 	// The module name, e.g. for this repo github.com/Torwalt/gosrcobfsc. We
@@ -31,4 +35,10 @@ func NewArgs(moduleName, source, sink *string) (Args, error) {
 		Source:     *source,
 		Sink:       *sink,
 	}, nil
+}
+
+func SinkiFy(in Args, sourceFilePath string) string {
+	fp, _ := strings.CutPrefix(sourceFilePath, in.Source)
+
+	return filepath.Join(in.Sink, fp)
 }
