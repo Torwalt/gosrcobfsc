@@ -1,4 +1,4 @@
-package obfuscating_test
+package obfuscate_test
 
 import (
 	"go/ast"
@@ -6,7 +6,7 @@ import (
 	"go/token"
 	"testing"
 
-	"github.com/Torwalt/gosrcobfsc/obfuscating"
+	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
 	"github.com/stretchr/testify/require"
 )
 
@@ -50,7 +50,7 @@ func TestVisit(t *testing.T) {
 	f, err := parser.ParseFile(fset, "", content, 0)
 	require.NoError(t, err)
 
-	v := obfuscating.NewVisitor()
+	v := obfuscate.NewVisitor()
 	ast.Walk(v, f)
 
 	ns := v.NamedSymbols()

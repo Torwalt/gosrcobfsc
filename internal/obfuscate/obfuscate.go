@@ -1,7 +1,10 @@
-package obfuscating
+package obfuscate
 
 import (
 	"go/ast"
+
+	"github.com/Torwalt/gosrcobfsc/internal/args"
+	"github.com/Torwalt/gosrcobfsc/internal/repo"
 )
 
 /*
@@ -21,24 +24,25 @@ TODO:
 */
 
 type Obfuscated struct {
-	Pkg Package
+	Pkg repo.Package
 	Ns  NamedSymbols
 }
 
-func Obfuscate(args Args) ([]Obfuscated, error) {
-	dirs, err := CollectDirs(args.Source)
+func Obfuscate(args args.Args) ([]Obfuscated, error) {
+	dirs, err := repo.CollectDirs(args.Source)
 	if err != nil {
 		return []Obfuscated{}, err
 	}
 
-	repo, err := NewRepository(dirs)
+	rpo, err := repo.NewRepository(dirs)
 	if err != nil {
 		return []Obfuscated{}, err
 	}
 
+	// I.e., we need to walk the rpo and mutate the NamedSymbols.
 	obf := []Obfuscated{}
-	for _, pkgs := range repo {
-		for _, pkg := range pkgs.pkgMap {
+	for _, pkgs := range rpo {
+		for _, pkg := range pkgs.PkgMap {
 			v := NewVisitor()
 			ast.Walk(v, pkg)
 			obf = append(obf, Obfuscated{
@@ -48,7 +52,7 @@ func Obfuscate(args Args) ([]Obfuscated, error) {
 		}
 	}
 
-	if err = WriteObfuscated(obf, args); err != nil {
+	if err = repo.WriteObfuscated(rpo, args); err != nil {
 		return obf, err
 	}
 

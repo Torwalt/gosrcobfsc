@@ -10,11 +10,11 @@ tasks:
 
   build:
     cmds:
-      - go build
+      - go build -o {{.BINARY_NAME}} ./cmd/main.go
 
   test:
     cmds:
-      - go test ./...
+      - go test ./internal/...
 
   test-integration:
     cmds:

@@ -1,4 +1,4 @@
-package obfuscating
+package repo
 
 import (
 	"go/ast"
@@ -6,6 +6,8 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+
+	"github.com/Torwalt/gosrcobfsc/internal/args"
 )
 
 type Repository []Package
@@ -14,7 +16,7 @@ type Package struct {
 	fset     *token.FileSet
 	name     string
 	fullPath string
-	pkgMap   map[string]*ast.Package
+	PkgMap   map[string]*ast.Package
 }
 
 func NewRepository(dirs Dirs) (Repository, error) {
@@ -29,32 +31,32 @@ func NewRepository(dirs Dirs) (Repository, error) {
 			fset:     fset,
 			name:     "",
 			fullPath: dir,
-			pkgMap:   pkgMap,
+			PkgMap:   pkgMap,
 		})
 	}
 
 	return repo, nil
 }
 
-func WriteObfuscated(in []Obfuscated, args Args) error {
-	for _, obf := range in {
+func WriteObfuscated(in []Package, a args.Args) error {
+	for _, pkg := range in {
 		// We are in a subdir.
-		if obf.Pkg.fullPath != args.Source {
-			snk := SinkiFy(args, obf.Pkg.fullPath)
+		if pkg.fullPath != a.Source {
+			snk := args.SinkiFy(a, pkg.fullPath)
 			if err := os.MkdirAll(snk, os.ModePerm); err != nil {
 				return err
 			}
 		}
 
-		for _, pkg := range obf.Pkg.pkgMap {
-			for name, file := range pkg.Files {
-				snk := SinkiFy(args, name)
+		for _, astPkg := range pkg.PkgMap {
+			for name, file := range astPkg.Files {
+				snk := args.SinkiFy(a, name)
 				f, err := os.Create(snk)
 				if err != nil {
 					return err
 				}
 
-				if err := format.Node(f, obf.Pkg.fset, file); err != nil {
+				if err := format.Node(f, pkg.fset, file); err != nil {
 					return err
 				}
 			}

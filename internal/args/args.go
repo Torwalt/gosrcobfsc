@@ -1,4 +1,4 @@
-package obfuscating
+package args
 
 import (
 	"errors"

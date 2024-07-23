@@ -4,7 +4,8 @@ import (
 	"flag"
 	"log"
 
-	"github.com/Torwalt/gosrcobfsc/obfuscating"
+	"github.com/Torwalt/gosrcobfsc/internal/args"
+	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
 )
 
 func main() {
@@ -13,7 +14,7 @@ func main() {
 	sinkFlag := flag.String("sink", "", "The full path where to write obfuscated directory.")
 	flag.Parse()
 
-	args, err := obfuscating.NewArgs(moduleNameFlag, sourceFlag, sinkFlag)
+	args, err := args.NewArgs(moduleNameFlag, sourceFlag, sinkFlag)
 	if err != nil {
 		flag.PrintDefaults()
 		log.Fatalf("%v", err)
@@ -24,13 +25,13 @@ func main() {
 	}
 }
 
-func run(args obfuscating.Args) error {
-	_, err := obfuscating.Obfuscate(args)
+func run(a args.Args) error {
+	_, err := obfuscate.Obfuscate(a)
 	if err != nil {
 		return err
 	}
 
-	log.Printf("Successfully obfuscated %v and wrote result into %v", args.Source, args.Sink)
+	log.Printf("Successfully obfuscated %v and wrote result into %v", a.Source, a.Sink)
 
 	return nil
 }

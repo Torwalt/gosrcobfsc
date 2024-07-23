@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/Torwalt/gosrcobfsc/obfuscating/hasher"
+	"github.com/Torwalt/gosrcobfsc/internal/hasher"
 	"github.com/stretchr/testify/require"
 )
 
