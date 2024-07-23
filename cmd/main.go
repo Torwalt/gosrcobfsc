@@ -6,6 +6,7 @@ import (
 
 	"github.com/Torwalt/gosrcobfsc/internal/args"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
+	"github.com/Torwalt/gosrcobfsc/internal/repo"
 )
 
 func main() {
@@ -26,7 +27,22 @@ func main() {
 }
 
 func run(a args.Args) error {
-	_, err := obfuscate.Obfuscate(a)
+	dirs, err := repo.CollectDirs(a.Source)
+	if err != nil {
+		return err
+	}
+
+	rpo, err := repo.NewRepository(dirs)
+	if err != nil {
+		return err
+	}
+
+	rpo, err = obfuscate.Obfuscate(rpo)
+	if err != nil {
+		return err
+	}
+
+	err = repo.WriteObfuscated(rpo, a)
 	if err != nil {
 		return err
 	}

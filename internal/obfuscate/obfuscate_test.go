@@ -4,8 +4,8 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/Torwalt/gosrcobfsc/internal/args"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
+	"github.com/Torwalt/gosrcobfsc/internal/repo"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,10 +16,12 @@ var (
 )
 
 func TestObfuscate(t *testing.T) {
-	sink := t.TempDir()
-	args, err := args.NewArgs(&moduleName, &thisRepoFullPath, &sink)
+	dirs, err := repo.CollectDirs(thisRepoFullPath)
 	require.NoError(t, err)
 
-	_, err = obfuscate.Obfuscate(args)
+	rpo, err := repo.NewRepository(dirs)
+	require.NoError(t, err)
+
+	_, err = obfuscate.Obfuscate(rpo)
 	require.NoError(t, err)
 }

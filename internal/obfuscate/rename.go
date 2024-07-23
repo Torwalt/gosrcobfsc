@@ -1,0 +1,4 @@
+package obfuscate
+
+func rename() {
+}
