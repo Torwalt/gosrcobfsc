@@ -4,18 +4,6 @@ import (
 	"go/ast"
 )
 
-// "bytes"
-// "go/ast"
-// "go/format"
-// "go/parser"
-// "go/token"
-
-/*
-Goal: Collect all "user named" tokens, rename them and output same structure.
-
-https://eli.thegreenplace.net/2021/rewriting-go-source-code-with-ast-tooling/
-*/
-
 /*
 
 Hard part: module package must be renamed, too, but external packages cannot be renamed.
@@ -60,24 +48,9 @@ func Obfuscate(args Args) ([]Obfuscated, error) {
 		}
 	}
 
-	// Obfuscate every user defined symbol in nsSet.
-	// Create Identical dir structure in sink.
-	// Write obfuscated fset.
-
-	// f, err := parser.ParseFile(fset, "", content, 0)
-	// if err != nil {
-	// 	return "", err
-	// }
-	//
-	// v := NewVisitor(fset)
-	// ast.Walk(v, f)
-	//
-	// b := bytes.NewBufferString("")
-	// if err := format.Node(b, fset, f); err != nil {
-	// 	return "", err
-	// }
-	//
-	// return b.String(), nil
+	if err = WriteObfuscated(obf, args); err != nil {
+		return obf, err
+	}
 
 	return obf, nil
 }

@@ -8,6 +8,7 @@ import (
 )
 
 func TestWriteObfuscated(t *testing.T) {
+	sink := t.TempDir()
 	args, err := obfuscating.NewArgs(&moduleName, &thisRepoFullPath, &sink)
 	require.NoError(t, err)
 

@@ -11,8 +11,11 @@ func main() {
 	moduleNameFlag := flag.String("moduleName", "", "The name of the module (top of go.mod).")
 	sourceFlag := flag.String("source", "", "The full path of the source repository.")
 	sinkFlag := flag.String("sink", "", "The full path where to write obfuscated directory.")
+	flag.Parse()
+
 	args, err := obfuscating.NewArgs(moduleNameFlag, sourceFlag, sinkFlag)
 	if err != nil {
+		flag.PrintDefaults()
 		log.Fatalf("%v", err)
 	}
 
@@ -22,11 +25,12 @@ func main() {
 }
 
 func run(args obfuscating.Args) error {
-	out, err := obfuscating.Obfuscate(args)
+	_, err := obfuscating.Obfuscate(args)
 	if err != nil {
 		return err
 	}
-	log.Printf("Obfuscated file: %v", out)
+
+	log.Printf("Successfully obfuscated %v and wrote result into %v", args.Source, args.Sink)
 
 	return nil
 }

@@ -1,0 +1,31 @@
+version: '3'
+
+vars:
+  BINARY_NAME: 'gosrcobfsc'
+
+tasks:
+  default:
+    cmds:
+      - task --list-all
+
+  build:
+    cmds:
+      - go build
+
+  test:
+    cmds:
+      - go test ./...
+
+  test-integration:
+    cmds:
+      - cmd: echo "Building..."
+        silent: true
+      - task: build
+        silent: true
+      - cmd: echo "Deleting previous test run"
+        silent: true
+      - cmd: find ./tests -mindepth 1 ! -name '.gitkeep' -delete
+        silent: true
+      - cmd: ./{{.BINARY_NAME}} --moduleName=gosrcobfsc --source=/home/ada/repos/gosrcobfsc --sink=/home/ada/repos/gosrcobfsc/tests
+        silent: true
+
