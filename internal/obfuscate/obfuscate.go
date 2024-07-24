@@ -25,6 +25,7 @@ func Obfuscate(rpo repo.Repository) (repo.Repository, error) {
 		for _, pkg := range pkgs.PkgMap {
 			v := NewVisitor()
 			ast.Walk(v, pkg)
+			rename(v.ns)
 		}
 	}
 

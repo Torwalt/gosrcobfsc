@@ -11,13 +11,39 @@ type Hashed = string
 // NOTE: Maybe I will need to control the hash length because that might cause
 // problems with either go syntax or later on directory/package names.
 func Hash(in string) Hashed {
+	if in == "" {
+		return Hashed("")
+	}
+
 	hash := sha256.Sum256([]byte(in))
 
 	hexHash := hex.EncodeToString(hash[:])
 
 	letters := hexToLetters(hexHash)
 
+	firstLetterB := in[0]
+	firstLetter := string(firstLetterB)
+	upperFirstLetter := strings.ToUpper(firstLetter)
+
+	if upperFirstLetter == firstLetter {
+		letters = rebuildWithUpper(upperFirstLetter, letters)
+	}
+
 	return Hashed(letters)
+}
+
+func rebuildWithUpper(upper, all string) string {
+	var out strings.Builder
+	for idx, ru := range all {
+		if idx == 0 {
+			out.WriteString(upper)
+			continue
+		}
+
+		out.WriteRune(ru)
+	}
+
+	return out.String()
 }
 
 func hexToLetters(hexString string) string {
