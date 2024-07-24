@@ -19,13 +19,13 @@ tasks:
   test-integration:
     cmds:
       - cmd: echo "Building..."
-        silent: true
       - task: build
-        silent: true
-      - cmd: echo "Deleting previous test run"
-        silent: true
+      - cmd: echo "Deleting previous test run."
       - cmd: find ./tests -mindepth 1 ! -name '.gitkeep' -delete
-        silent: true
       - cmd: ./{{.BINARY_NAME}} --moduleName=gosrcobfsc --source=/home/ada/repos/gosrcobfsc --sink=/home/ada/repos/gosrcobfsc/tests
-        silent: true
+      - cmd: echo "Building project in obfuscated directory."
+      - cmd: (cd /home/ada/repos/gosrcobfsc/tests && go build ./cmd/main.go)
+      - cmd: echo "Running tests in obfuscated directory."
+      - cmd: (cd /home/ada/repos/gosrcobfsc/tests && go test ./...)
+    silent: true
 
