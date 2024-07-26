@@ -25,6 +25,9 @@ func rename(ns NamedSymbols) {
 			switch t := stmt.(type) {
 			case *ast.AssignStmt:
 				renameAssignStatement(t)
+			default:
+				_ = ""
+				print("")
 			}
 		}
 	}

@@ -4,7 +4,10 @@ import (
 	"go/ast"
 )
 
+// NamedSymbols represents all the Nodes that comprise a package.
 type NamedSymbols struct {
+	Package  *ast.Package
+	Files    []*ast.File
 	Funcs    []*ast.FuncDecl
 	Fields   []*ast.Field
 	Comments []*ast.Comment
@@ -40,6 +43,13 @@ func (v *Visitor) Visit(n ast.Node) ast.Visitor {
 	}
 
 	switch t := n.(type) {
+	case *ast.Package:
+		if v.ns.Package != nil {
+			panic("There should be only one package!")
+		}
+		v.ns.Package = t
+	case *ast.File:
+		v.ns.Files = append(v.ns.Files, t)
 	case *ast.FuncDecl:
 		v.ns.Funcs = append(v.ns.Funcs, t)
 	case *ast.Field:
