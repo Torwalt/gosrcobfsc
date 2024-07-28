@@ -22,6 +22,6 @@ func TestObfuscate(t *testing.T) {
 	rpo, err := repo.NewRepository(dirs)
 	require.NoError(t, err)
 
-	_, err = obfuscate.Obfuscate(rpo)
+	_, err = obfuscate.Obfuscate(rpo, moduleName)
 	require.NoError(t, err)
 }

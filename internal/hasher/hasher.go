@@ -8,11 +8,17 @@ import (
 
 type Hashed = string
 
+const hashIdent = "XXX"
+
 // NOTE: Maybe I will need to control the hash length because that might cause
 // problems with either go syntax or later on directory/package names.
 func Hash(in string) Hashed {
 	if in == "" {
 		return Hashed("")
+	}
+
+	if isHash(in) {
+		return Hashed(in)
 	}
 
 	hash := sha256.Sum256([]byte(in))
@@ -29,7 +35,13 @@ func Hash(in string) Hashed {
 		letters = rebuildWithUpper(upperFirstLetter, letters)
 	}
 
+	letters = letters + hashIdent
+
 	return Hashed(letters)
+}
+
+func isHash(in string) bool {
+	return strings.HasSuffix(in, hashIdent)
 }
 
 func rebuildWithUpper(upper, all string) string {

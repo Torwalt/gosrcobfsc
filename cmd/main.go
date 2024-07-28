@@ -37,7 +37,7 @@ func run(a args.Args) error {
 		return err
 	}
 
-	rpo, err = obfuscate.Obfuscate(rpo)
+	rpo, err = obfuscate.Obfuscate(rpo, a.ModuleName)
 	if err != nil {
 		return err
 	}

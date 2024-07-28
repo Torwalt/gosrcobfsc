@@ -15,15 +15,15 @@ func TestHash(t *testing.T) {
 	}{
 		{
 			input:    "JustAStruct",
-			expected: "Jhbebfhdagfecigcbfcddibjbaehjbgaeeeachiicacadcbidfefhdaffdbgbcce",
+			expected: "JhbebfhdagfecigcbfcddibjbaehjbgaeeeachiicacadcbidfefhdaffdbgbcceXXX",
 		},
 		{
 			input:    "JustAStrucT",
-			expected: "Jccgfdfggdffedbbfdbeeeiaadfefcabajbdcfjgfccefibeeffceehcddibjaeh",
+			expected: "JccgfdfggdffedbbfdbeeeiaadfefcabajbdcfjgfccefibeeffceehcddibjaehXXX",
 		},
 		{
 			input:    "justAStrucT",
-			expected: "ecbadbbdfeaceceaifieccfecchfcgdbbbbfaegfcgiaeifbdbbjebaeaeadddbi",
+			expected: "ecbadbbdfeaceceaifieccfecchfcgdbbbbfaegfcgiaeifbdbbjebaeaeadddbiXXX",
 		},
 	}
 
