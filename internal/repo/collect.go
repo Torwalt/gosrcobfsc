@@ -4,11 +4,15 @@ import (
 	"io/fs"
 	"path/filepath"
 	"strings"
+
+	"github.com/Torwalt/gosrcobfsc/internal/repo/gitignore"
 )
 
 type Dirs = []string
 
-func CollectDirs(source string) (Dirs, error) {
+type FilterFunc func(path string) bool
+
+func CollectDirs(source string, ff FilterFunc) (Dirs, error) {
 	dirs := Dirs{}
 
 	walkerFunc := func(path string, d fs.DirEntry, err error) error {
@@ -16,7 +20,7 @@ func CollectDirs(source string) (Dirs, error) {
 			return nil
 		}
 
-		if !keep(path) {
+		if ff(path) {
 			return nil
 		}
 
@@ -32,10 +36,23 @@ func CollectDirs(source string) (Dirs, error) {
 	return dirs, nil
 }
 
-func keep(path string) bool {
-	if strings.Contains(path, "/.git") {
-		return false
+func NoFilter(_ string) bool {
+	return false
+}
+
+func FilterFuncWithGitIgnore(gi gitignore.GitIgnore, rootPath string) FilterFunc {
+	return func(path string) bool {
+		trimmed := cutRootPath(path, rootPath)
+		return gi.PathExcluded(trimmed)
+	}
+}
+
+func cutRootPath(path, root string) string {
+	if path == root {
+		return path
 	}
 
-	return true
+	out, _ := strings.CutPrefix(path, root)
+
+	return out
 }

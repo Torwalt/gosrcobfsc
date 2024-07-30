@@ -8,8 +8,7 @@ import (
 )
 
 const (
-	mainFunc  = "main"
-	errorType = "error"
+	mainFunc = "main"
 )
 
 /* TODO:
@@ -42,13 +41,25 @@ func (fr *FileRenamer) renameSpecs(in []ast.Spec) {
 		switch t := s.(type) {
 		case *ast.TypeSpec:
 			fr.renameTypeSpec(t)
+		// TODO: Adjust imports in the same way as the directories.
 		case *ast.ImportSpec:
+			fr.renameImportSpec(t)
 		case *ast.ValueSpec:
 			fr.renameValueSpec(t)
 		default:
 			fmt.Printf("Found unhandled in renameSpecs: %v\n", t)
 		}
 	}
+}
+
+func (fr *FileRenamer) renameImportSpec(in *ast.ImportSpec) {
+	if fr.ic.IsExternalImport(in.Path.Value) {
+		return
+	}
+
+	fr.renameIdent(in.Name)
+	hashedImport := fr.ic.HashImport(in.Path.Value)
+	in.Path.Value = AddEscapedQuotes(hashedImport)
 }
 
 func (fr *FileRenamer) renameValueSpec(in *ast.ValueSpec) {
@@ -246,6 +257,8 @@ func (fr *FileRenamer) renameExpr(in ast.Expr) {
 		fr.renameSelectorExpr(t)
 	case *ast.StructType:
 		fr.renameStructType(t)
+		// TODO: Handle theses cases. One of it is literal strings, which will be
+		// hard to obfuscate without destroying actual formatting directives.
 	case *ast.BasicLit:
 	case *ast.StarExpr:
 	case *ast.UnaryExpr:

@@ -1,16 +1,21 @@
 package renamer
 
 import (
+	"fmt"
 	"go/ast"
+	"path/filepath"
 	"strings"
+
+	"github.com/Torwalt/gosrcobfsc/internal/hasher"
 )
 
 type importPath = string
 
 type ImportChecker struct {
-	externalImports map[importPath]struct{}
-	internalImports map[importPath]struct{}
-	moduleName      string
+	externalImports  map[importPath]struct{}
+	internalImports  map[importPath]struct{}
+	moduleName       string
+	hashedModuleName string
 }
 
 func NewImportChecker(file *ast.File, moduleName string) *ImportChecker {
@@ -28,9 +33,10 @@ func NewImportChecker(file *ast.File, moduleName string) *ImportChecker {
 	}
 
 	return &ImportChecker{
-		externalImports: exImp,
-		internalImports: inImp,
-		moduleName:      moduleName,
+		externalImports:  exImp,
+		internalImports:  inImp,
+		moduleName:       moduleName,
+		hashedModuleName: hasher.Hash(moduleName),
 	}
 }
 
@@ -38,6 +44,23 @@ func (ic *ImportChecker) IsExternalImport(in string) bool {
 	_, isExternal := ic.externalImports[in]
 
 	return isExternal
+}
+
+func (ic *ImportChecker) HashImport(in string) string {
+	fp, _ := strings.CutPrefix(in, ic.moduleName)
+	pathParts := strings.Split(fp, string(filepath.Separator))
+
+	hashedParts := []string{}
+	hashedParts = append(hashedParts, ic.hashedModuleName)
+	for _, part := range pathParts {
+		hashedParts = append(hashedParts, hasher.Hash(part))
+	}
+
+	return filepath.Join(hashedParts...)
+}
+
+func AddEscapedQuotes(in string) string {
+	return fmt.Sprintf("\"%v\"", in)
 }
 
 func cleanImportString(in string) string {

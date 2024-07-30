@@ -14,7 +14,7 @@ tasks:
 
   test:
     cmds:
-      - go test ./internal/...
+      - gotestsum -- -v ./internal/...
 
   test-integration:
     cmds:

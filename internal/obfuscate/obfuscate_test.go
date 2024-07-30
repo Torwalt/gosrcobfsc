@@ -6,6 +6,7 @@ import (
 
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
 	"github.com/Torwalt/gosrcobfsc/internal/repo"
+	"github.com/Torwalt/gosrcobfsc/internal/repo/gitignore"
 	"github.com/stretchr/testify/require"
 )
 
@@ -16,7 +17,10 @@ var (
 )
 
 func TestObfuscate(t *testing.T) {
-	dirs, err := repo.CollectDirs(thisRepoFullPath)
+	gi, err := gitignore.NewFromFilePath(thisRepoFullPath)
+	require.NoError(t, err)
+
+	dirs, err := repo.CollectDirs(thisRepoFullPath, repo.FilterFuncWithGitIgnore(gi, thisRepoFullPath))
 	require.NoError(t, err)
 
 	rpo, err := repo.NewRepository(dirs)

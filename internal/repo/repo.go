@@ -14,7 +14,6 @@ type Repository []Package
 
 type Package struct {
 	fset     *token.FileSet
-	name     string
 	fullPath string
 	PkgMap   map[string]*ast.Package
 }
@@ -29,7 +28,6 @@ func NewRepository(dirs Dirs) (Repository, error) {
 		}
 		repo = append(repo, Package{
 			fset:     fset,
-			name:     "",
 			fullPath: dir,
 			PkgMap:   pkgMap,
 		})

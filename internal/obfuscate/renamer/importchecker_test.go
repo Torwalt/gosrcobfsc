@@ -79,7 +79,7 @@ func TestNewImportChecker(t *testing.T) {
 	ic := renamer.NewImportChecker(f, moduleName)
 	require.NotEmpty(t, ic)
 
-	tests := []struct {
+	isExternalImportTests := []struct {
 		path       string
 		isExternal bool
 	}{
@@ -105,10 +105,23 @@ func TestNewImportChecker(t *testing.T) {
 		},
 	}
 
-	for _, tt := range tests {
+	for _, tt := range isExternalImportTests {
 		t.Run(fmt.Sprintf("Test with path: %v", tt.path), func(t *testing.T) {
 			isExternal := ic.IsExternalImport(tt.path)
 			assert.Equal(t, tt.isExternal, isExternal)
 		})
 	}
+
+	t.Run("Test HashImport", func(t *testing.T) {
+		p := "github.com/Torwalt/gosrcobfsc/internal/repo"
+		res := ic.HashImport(p)
+		exp := "ddbggbhbcdbbaccffcbdbcijgabaacdfaiefdbcdagfbeaeeieccfjecahgaeiibXXX/dbedccbdadacfhbgaiefeaiecaccgicdffcaecgjhgddfecfeffcicjgfgbcafefXXX/ahbcaccchhfehafidhaadefjheiedfjejfiaabffdhgfcecfdjbaecbcchbcgdfeXXX"
+		assert.Equal(t, exp, res)
+	})
+}
+
+func TestAddEscapedQuotes(t *testing.T) {
+	act := renamer.AddEscapedQuotes("ahbcaccchhfehafidhaadefjheiedfjejfiaabffdhgfcecfdjbaecbcchbcgdfeXXX")
+	exp := "\"ahbcaccchhfehafidhaadefjheiedfjejfiaabffdhgfcecfdjbaecbcchbcgdfeXXX\""
+	assert.Equal(t, exp, act)
 }

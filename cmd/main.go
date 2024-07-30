@@ -7,6 +7,7 @@ import (
 	"github.com/Torwalt/gosrcobfsc/internal/args"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
 	"github.com/Torwalt/gosrcobfsc/internal/repo"
+	"github.com/Torwalt/gosrcobfsc/internal/repo/gitignore"
 )
 
 func main() {
@@ -27,7 +28,12 @@ func main() {
 }
 
 func run(a args.Args) error {
-	dirs, err := repo.CollectDirs(a.Source)
+	gi, err := gitignore.NewFromFilePath(a.Source)
+	if err != nil {
+		return err
+	}
+
+	dirs, err := repo.CollectDirs(a.Source, repo.FilterFuncWithGitIgnore(gi, a.Source))
 	if err != nil {
 		return err
 	}

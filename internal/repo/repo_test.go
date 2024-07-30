@@ -6,6 +6,7 @@ import (
 
 	"github.com/Torwalt/gosrcobfsc/internal/args"
 	"github.com/Torwalt/gosrcobfsc/internal/repo"
+	"github.com/Torwalt/gosrcobfsc/internal/repo/gitignore"
 	"github.com/stretchr/testify/require"
 )
 
@@ -20,7 +21,10 @@ func TestWriteObfuscated(t *testing.T) {
 	args, err := args.NewArgs(&moduleName, &thisRepoFullPath, &sink)
 	require.NoError(t, err)
 
-	dirs, err := repo.CollectDirs(args.Source)
+	gi, err := gitignore.NewFromFilePath(thisRepoFullPath)
+	require.NoError(t, err)
+
+	dirs, err := repo.CollectDirs(args.Source, repo.FilterFuncWithGitIgnore(gi, args.Source))
 	require.NoError(t, err)
 
 	rpo, err := repo.NewRepository(dirs)
