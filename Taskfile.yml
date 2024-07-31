@@ -2,6 +2,8 @@ version: '3'
 
 vars:
   BINARY_NAME: 'gosrcobfsc'
+  HASHED_CMD: 'aedcfbcbdgdciaadcbbijdfjhhdechchcefebcchfaacadegjagcegaifdcfbbggXXX'
+  HASHED_MAIN: 'cihdfhjaigcadibdddfcdhhdbbaecfhddedabebbjaicefhabcbahfijbfcfccgbXXX.go'
 
 tasks:
   default:
@@ -24,7 +26,7 @@ tasks:
       - cmd: find ./tests -mindepth 1 ! -name '.gitkeep' -delete
       - cmd: ./{{.BINARY_NAME}} --moduleName=gosrcobfsc --source=/home/ada/repos/gosrcobfsc --sink=/home/ada/repos/gosrcobfsc/tests
       - cmd: echo "Building project in obfuscated directory."
-      - cmd: (cd /home/ada/repos/gosrcobfsc/tests && go build ./cmd/main.go)
+      - cmd: (cd /home/ada/repos/gosrcobfsc/tests && go build ./{{.HASHED_CMD}}/{{.HASHED_MAIN}})
       - cmd: echo "Running tests in obfuscated directory."
       - cmd: (cd /home/ada/repos/gosrcobfsc/tests && go test ./...)
     silent: true

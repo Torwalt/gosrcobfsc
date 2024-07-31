@@ -6,8 +6,12 @@ import (
 	"go/parser"
 	"go/token"
 	"os"
+	"path/filepath"
+	"strings"
 
 	"github.com/Torwalt/gosrcobfsc/internal/args"
+	"github.com/Torwalt/gosrcobfsc/internal/hasher"
+	"github.com/Torwalt/gosrcobfsc/internal/paths"
 )
 
 type Repository []Package
@@ -40,7 +44,8 @@ func WriteObfuscated(in []Package, a args.Args) error {
 	for _, pkg := range in {
 		// We are in a subdir.
 		if pkg.fullPath != a.Source {
-			snk := args.SinkiFy(a, pkg.fullPath)
+			hashed := hashPath(a.Source, pkg.fullPath)
+			snk := args.SinkiFy(a, hashed)
 			if err := os.MkdirAll(snk, os.ModePerm); err != nil {
 				return err
 			}
@@ -48,7 +53,8 @@ func WriteObfuscated(in []Package, a args.Args) error {
 
 		for _, astPkg := range pkg.PkgMap {
 			for name, file := range astPkg.Files {
-				snk := args.SinkiFy(a, name)
+				hashed := hashPath(a.Source, name)
+				snk := args.SinkiFy(a, hashed)
 				f, err := os.Create(snk)
 				if err != nil {
 					return err
@@ -62,4 +68,22 @@ func WriteObfuscated(in []Package, a args.Args) error {
 	}
 
 	return nil
+}
+
+func hashPath(root, path string) string {
+	nonRootPath, _ := strings.CutPrefix(path, root)
+	ext := filepath.Ext(nonRootPath)
+	split := paths.SplitAndFilter(nonRootPath, paths.FilterEmpty)
+
+	hashed := make([]string, 0, len(split))
+	for idx, p := range split {
+		hash := hasher.Hash(p)
+		if idx == len(split)-1 {
+			// Append the .go extension to hashed path.
+			hash += ext
+		}
+		hashed = append(hashed, hash)
+	}
+
+	return filepath.Join(hashed...)
 }
