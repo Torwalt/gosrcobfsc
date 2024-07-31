@@ -1,6 +1,9 @@
 package gitignore
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 type (
 	literal = string
@@ -13,8 +16,22 @@ type literalOrExpr struct {
 }
 
 func (loe literalOrExpr) matchOrCompare(in string) bool {
+	ok := loe.actualMatchOrCompare(in)
+	if ok {
+		return true
+	}
+
+	// Kinda hacky but meh.
+	return strings.HasPrefix(in, loe.lit)
+}
+
+func (loe literalOrExpr) actualMatchOrCompare(in string) bool {
+	if in == loe.lit {
+		return true
+	}
+
 	if loe.expr == nil {
-		return in == loe.lit
+		return false
 	}
 
 	return loe.expr.MatchString(in)
