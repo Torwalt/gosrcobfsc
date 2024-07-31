@@ -43,7 +43,7 @@ func (fr *FileRenamer) renameSpecs(in []ast.Spec) {
 			fr.renameTypeSpec(t)
 		// TODO: Adjust imports in the same way as the directories.
 		case *ast.ImportSpec:
-			fr.renameImportSpec(t)
+			// fr.renameImportSpec(t)
 		case *ast.ValueSpec:
 			fr.renameValueSpec(t)
 		default:

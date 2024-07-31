@@ -14,10 +14,11 @@ const (
 )
 
 type GitIgnore struct {
-	ruleMap map[string]literalOrExpr
+	ruleMap             map[string]literalOrExpr
+	pathToGitignoreFile string
 }
 
-func NewGitIgnore(in string) GitIgnore {
+func NewGitIgnore(in, path string) GitIgnore {
 	splitted := strings.Split(in, linebreakSep)
 	filtered := []string{}
 	for _, s := range splitted {
@@ -29,7 +30,6 @@ func NewGitIgnore(in string) GitIgnore {
 
 	ruleMap := make(ruleMap, len(filtered))
 	for _, r := range filtered {
-		// TODO: Refactor to use filepath.Match (which is closer to .gitignore matching than regex.
 		rg, err := regexp.Compile(r)
 		if err != nil {
 			ruleMap[r] = literalOrExpr{
@@ -51,7 +51,8 @@ func NewGitIgnore(in string) GitIgnore {
 	}
 
 	return GitIgnore{
-		ruleMap: ruleMap,
+		ruleMap:             ruleMap,
+		pathToGitignoreFile: path,
 	}
 }
 
@@ -62,10 +63,12 @@ func NewFromFilePath(path string) (GitIgnore, error) {
 		return GitIgnore{}, err
 	}
 
-	return NewGitIgnore(string(b)), nil
+	return NewGitIgnore(string(b), path), nil
 }
 
 func (gi *GitIgnore) PathExcluded(path string) bool {
+	path = gi.cutPrefix(path)
+
 	// Maybe its just a literal so we do not have to iterate over everything.
 	// Not really necessary but meh.
 	loe, ok := gi.ruleMap[path]
@@ -80,4 +83,9 @@ func (gi *GitIgnore) PathExcluded(path string) bool {
 	}
 
 	return false
+}
+
+func (gi *GitIgnore) cutPrefix(path string) string {
+	af, _ := strings.CutPrefix(path, gi.pathToGitignoreFile)
+	return af
 }
