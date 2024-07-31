@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"github.com/Torwalt/gosrcobfsc/internal/hasher"
+	"github.com/Torwalt/gosrcobfsc/internal/paths"
 )
 
 type importPath = string
@@ -41,14 +42,17 @@ func NewImportChecker(file *ast.File, moduleName string) *ImportChecker {
 }
 
 func (ic *ImportChecker) IsExternalImport(in string) bool {
+	in = cleanImportString(in)
 	_, isExternal := ic.externalImports[in]
 
 	return isExternal
 }
 
 func (ic *ImportChecker) HashImport(in string) string {
+	in = cleanImportString(in)
 	fp, _ := strings.CutPrefix(in, ic.moduleName)
-	pathParts := strings.Split(fp, string(filepath.Separator))
+
+	pathParts := paths.SplitAndFilter(fp, paths.FilterEmpty)
 
 	hashedParts := []string{}
 	hashedParts = append(hashedParts, ic.hashedModuleName)
