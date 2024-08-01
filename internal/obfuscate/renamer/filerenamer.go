@@ -355,6 +355,10 @@ func (fr *FileRenamer) renameIdent(in *ast.Ident) {
 		return
 	}
 
+	if in.Name == "nil" {
+		return
+	}
+
 	in.Name = hasher.Hash(in.Name)
 }
 

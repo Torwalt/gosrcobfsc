@@ -1,0 +1,4 @@
+- rename package name in file
+  - handle _test packages
+  - test files need to keep _test suffix
+- write go.mod
