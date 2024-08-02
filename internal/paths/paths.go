@@ -22,3 +22,8 @@ func SplitAndFilter(path string, ff FilterFunc) []string {
 
 	return out
 }
+
+func NonRootPath(fullPath, root string) string {
+	nonRootPath, _ := strings.CutPrefix(fullPath, root)
+	return nonRootPath
+}

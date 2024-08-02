@@ -4,30 +4,50 @@ import (
 	"go/ast"
 
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate/renamer"
+	"github.com/Torwalt/gosrcobfsc/internal/paths"
 	"github.com/Torwalt/gosrcobfsc/internal/repo"
 )
 
-/*
+type ObfuscatedRepository []ObfuscatedPackage
 
-Hard part: module package must be renamed, too, but external packages cannot be renamed.
-Super hard part: What if code has custom private packages imported??
+type Filename = string
 
-*/
+type ObfuscatedPackage struct {
+	Package         *repo.Package
+	ObfuscatedPath  renamer.ObfuscatedPath
+	ObfuscatedFiles map[Filename]renamer.ObfuscatedPath
+}
 
-/*
-TODO:
-- pkg and directory renaming
-- lookup of packages and their paths to change imports
-*/
+func Obfuscate(rpo repo.Repository) (ObfuscatedRepository, error) {
+	out := make(ObfuscatedRepository, 0)
 
-func Obfuscate(rpo repo.Repository, moduleName string) (repo.Repository, error) {
-	for _, pkgs := range rpo {
+	for _, pkgs := range rpo.Packages {
 		for _, pkg := range pkgs.PkgMap {
-			rename(pkg, moduleName)
+			rename(pkg, rpo.ModuleName)
 		}
+		out = append(out, NewObfuscatedPackage(pkgs, rpo.Path))
 	}
 
-	return rpo, nil
+	return out, nil
+}
+
+func NewObfuscatedPackage(repoPkg *repo.Package, repoPath string) ObfuscatedPackage {
+	op := renamer.RenamePackage(paths.NonRootPath(repoPkg.FullPath, repoPath))
+	fileMap := make(map[Filename]renamer.ObfuscatedPath)
+	for _, pkg := range repoPkg.PkgMap {
+		for name := range pkg.Files {
+			nrp := paths.NonRootPath(name, repoPath)
+			r := renamer.RenamePackage(nrp)
+			fileMap[nrp] = r
+		}
+
+	}
+
+	return ObfuscatedPackage{
+		Package:         repoPkg,
+		ObfuscatedPath:  op,
+		ObfuscatedFiles: fileMap,
+	}
 }
 
 func rename(pkg *ast.Package, moduleName string) {

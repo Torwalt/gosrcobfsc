@@ -3,6 +3,7 @@ package renamer
 import (
 	"fmt"
 	"go/ast"
+	"strings"
 
 	"github.com/Torwalt/gosrcobfsc/internal/hasher"
 )
@@ -10,11 +11,6 @@ import (
 const (
 	mainFunc = "main"
 )
-
-/* TODO:
-- create directories and files with hashed names
-- hash module pkgs, but dont hash other pkgs (e.g. std lib, external pkgs)
-*/
 
 type FileRenamer struct {
 	pkg  *ast.Package
@@ -31,9 +27,26 @@ func NewFileRenamer(pkg *ast.Package, file *ast.File, ic *ImportChecker) *FileRe
 }
 
 func (fr *FileRenamer) Rename() {
+	fr.renamePackageName(fr.file.Name)
+
 	for _, decl := range fr.file.Decls {
 		fr.renameDecl(decl)
 	}
+}
+
+func (fr *FileRenamer) renamePackageName(in *ast.Ident) {
+	if in.Name == mainFunc {
+		return
+	}
+
+	if !strings.HasSuffix(in.Name, testSuffix) {
+		fr.renameIdent(in)
+		return
+	}
+
+	pkg := strings.Split(in.Name, "_")[0]
+	hashed := hasher.Hash(pkg)
+	in.Name = hashed + testSuffix
 }
 
 func (fr *FileRenamer) renameSpecs(in []ast.Spec) {
@@ -279,6 +292,8 @@ func (fr *FileRenamer) renameExpr(in ast.Expr) {
 		fr.renameTypeAssertExpr(t)
 	case *ast.MapType:
 		fr.renameMapType(t)
+	case *ast.FuncType:
+		fr.renameFuncType(t)
 	default:
 		fmt.Printf("Found unhandled in renameExpr: %v\n", t)
 	}

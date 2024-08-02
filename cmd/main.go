@@ -8,6 +8,7 @@ import (
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
 	"github.com/Torwalt/gosrcobfsc/internal/repo"
 	"github.com/Torwalt/gosrcobfsc/internal/repo/gitignore"
+	"github.com/Torwalt/gosrcobfsc/internal/sink"
 )
 
 func main() {
@@ -38,17 +39,17 @@ func run(a args.Args) error {
 		return err
 	}
 
-	rpo, err := repo.NewRepository(dirs)
+	rpo, err := repo.NewRepository(dirs, a.Source, a.ModuleName)
 	if err != nil {
 		return err
 	}
 
-	rpo, err = obfuscate.Obfuscate(rpo, a.ModuleName)
+	or, err := obfuscate.Obfuscate(rpo)
 	if err != nil {
 		return err
 	}
 
-	err = repo.WriteObfuscated(rpo, a)
+	err = sink.WriteObfuscated(or, a)
 	if err != nil {
 		return err
 	}

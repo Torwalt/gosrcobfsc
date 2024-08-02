@@ -1,24 +1,24 @@
-package repo_test
+package sink_test
 
 import (
-	"path/filepath"
 	"testing"
 
 	"github.com/Torwalt/gosrcobfsc/internal/args"
+	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
 	"github.com/Torwalt/gosrcobfsc/internal/repo"
 	"github.com/Torwalt/gosrcobfsc/internal/repo/gitignore"
+	"github.com/Torwalt/gosrcobfsc/internal/sink"
 	"github.com/stretchr/testify/require"
 )
 
 var (
 	thisRepoFullPath = "/home/ada/repos/gosrcobfsc/"
 	moduleName       = "github.com/Torwalt/gosrcobfsc"
-	sink             = filepath.Join(thisRepoFullPath, "tests")
 )
 
-func TestNewRepository(t *testing.T) {
-	sink := t.TempDir()
-	args, err := args.NewArgs(&moduleName, &thisRepoFullPath, &sink)
+func TestWriteObfuscated(t *testing.T) {
+	snk := t.TempDir()
+	args, err := args.NewArgs(&moduleName, &thisRepoFullPath, &snk)
 	require.NoError(t, err)
 
 	gi, err := gitignore.NewFromFilePath(thisRepoFullPath)
@@ -30,4 +30,11 @@ func TestNewRepository(t *testing.T) {
 	rpo, err := repo.NewRepository(dirs, args.Source, args.ModuleName)
 	require.NoError(t, err)
 	require.NotEmpty(t, rpo)
+
+	or, err := obfuscate.Obfuscate(rpo)
+	require.NoError(t, err)
+	require.NotEmpty(t, or)
+
+	err = sink.WriteObfuscated(or, args)
+	require.NoError(t, err)
 }
