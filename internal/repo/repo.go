@@ -1,15 +1,19 @@
 package repo
 
 import (
+	"errors"
+	"fmt"
 	"go/ast"
 	"go/parser"
 	"go/token"
+
+	"github.com/Torwalt/gosrcobfsc/internal/repo/gomod"
 )
 
 type Repository struct {
-	Packages   []*Package
-	Path       string
-	ModuleName string
+	Packages []*Package
+	Path     string
+	Gomod    gomod.GoMod
 }
 
 type Package struct {
@@ -18,7 +22,7 @@ type Package struct {
 	PkgMap   map[string]*ast.Package
 }
 
-func NewRepository(dirs Dirs, repoPath, moduleName string) (Repository, error) {
+func NewRepository(dirs Dirs, repoPath string) (Repository, error) {
 	pkgs := make([]*Package, 0, len(dirs))
 	for _, dir := range dirs {
 		fset := token.NewFileSet()
@@ -33,9 +37,14 @@ func NewRepository(dirs Dirs, repoPath, moduleName string) (Repository, error) {
 		})
 	}
 
+	gmd, err := gomod.NewGoModFromPath(repoPath)
+	if err != nil {
+		return Repository{}, errors.New(fmt.Sprintf("could not parse gomod file in given path: %v", err))
+	}
+
 	return Repository{
-		Packages:   pkgs,
-		Path:       repoPath,
-		ModuleName: moduleName,
+		Packages: pkgs,
+		Path:     repoPath,
+		Gomod:    gmd,
 	}, nil
 }

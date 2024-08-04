@@ -27,7 +27,7 @@ func TestNewRepository(t *testing.T) {
 	dirs, err := repo.CollectDirs(args.Source, repo.FilterFuncWithGitIgnore(gi, args.Source))
 	require.NoError(t, err)
 
-	rpo, err := repo.NewRepository(dirs, args.Source, args.ModuleName)
+	rpo, err := repo.NewRepository(dirs, args.Source)
 	require.NoError(t, err)
 	require.NotEmpty(t, rpo)
 }

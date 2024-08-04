@@ -39,7 +39,7 @@ func run(a args.Args) error {
 		return err
 	}
 
-	rpo, err := repo.NewRepository(dirs, a.Source, a.ModuleName)
+	rpo, err := repo.NewRepository(dirs, a.Source)
 	if err != nil {
 		return err
 	}

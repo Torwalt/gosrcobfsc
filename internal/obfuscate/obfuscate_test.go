@@ -23,7 +23,7 @@ func TestObfuscate(t *testing.T) {
 	dirs, err := repo.CollectDirs(thisRepoFullPath, repo.FilterFuncWithGitIgnore(gi, thisRepoFullPath))
 	require.NoError(t, err)
 
-	rpo, err := repo.NewRepository(dirs, thisRepoFullPath, moduleName)
+	rpo, err := repo.NewRepository(dirs, thisRepoFullPath)
 	require.NoError(t, err)
 
 	op, err := obfuscate.Obfuscate(rpo)

@@ -23,7 +23,7 @@ func Obfuscate(rpo repo.Repository) (ObfuscatedRepository, error) {
 
 	for _, pkgs := range rpo.Packages {
 		for _, pkg := range pkgs.PkgMap {
-			rename(pkg, rpo.ModuleName)
+			rename(pkg, rpo.Gomod.ModuleName)
 		}
 		out = append(out, NewObfuscatedPackage(pkgs, rpo.Path))
 	}
