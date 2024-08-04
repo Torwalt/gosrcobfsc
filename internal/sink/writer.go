@@ -5,14 +5,18 @@ import (
 	"fmt"
 	"go/format"
 	"os"
+	"path/filepath"
 
 	"github.com/Torwalt/gosrcobfsc/internal/args"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
 	"github.com/Torwalt/gosrcobfsc/internal/paths"
+	"github.com/Torwalt/gosrcobfsc/internal/repo/gomod"
 )
 
+const gomodFilename = "go.mod"
+
 func WriteObfuscated(in obfuscate.ObfuscatedRepository, a args.Args) error {
-	for _, obfPkg := range in {
+	for _, obfPkg := range in.Packages {
 		// Make dir of package
 		snk := args.SinkiFy(a, obfPkg.ObfuscatedPath.Full())
 		if err := os.MkdirAll(snk, os.ModePerm); err != nil {
@@ -38,6 +42,22 @@ func WriteObfuscated(in obfuscate.ObfuscatedRepository, a args.Args) error {
 				}
 			}
 		}
+	}
+
+	writeGomod(a.Sink, in.ObfuscatedGomod)
+
+	return nil
+}
+
+func writeGomod(sink string, gmd gomod.GoMod) error {
+	gmodFilePath := filepath.Join(sink, gomodFilename)
+	f, err := os.Create(gmodFilePath)
+	if err != nil {
+		return err
+	}
+	_, err = f.WriteString(gmd.String())
+	if err != nil {
+		return err
 	}
 
 	return nil

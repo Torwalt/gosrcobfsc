@@ -3,12 +3,17 @@ package obfuscate
 import (
 	"go/ast"
 
+	"github.com/Torwalt/gosrcobfsc/internal/hasher"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate/renamer"
 	"github.com/Torwalt/gosrcobfsc/internal/paths"
 	"github.com/Torwalt/gosrcobfsc/internal/repo"
+	"github.com/Torwalt/gosrcobfsc/internal/repo/gomod"
 )
 
-type ObfuscatedRepository []ObfuscatedPackage
+type ObfuscatedRepository struct {
+	Packages        []ObfuscatedPackage
+	ObfuscatedGomod gomod.GoMod
+}
 
 type Filename = string
 
@@ -19,15 +24,21 @@ type ObfuscatedPackage struct {
 }
 
 func Obfuscate(rpo repo.Repository) (ObfuscatedRepository, error) {
-	out := make(ObfuscatedRepository, 0)
+	out := ObfuscatedRepository{}
+	ops := make([]ObfuscatedPackage, 0)
 
 	for _, pkgs := range rpo.Packages {
 		for _, pkg := range pkgs.PkgMap {
 			rename(pkg, rpo.Gomod.ModuleName)
 		}
-		out = append(out, NewObfuscatedPackage(pkgs, rpo.Path))
+		ops = append(ops, NewObfuscatedPackage(pkgs, rpo.Path))
 	}
 
+	out.Packages = ops
+	out.ObfuscatedGomod = gomod.GoMod{
+		Version:    rpo.Gomod.Version,
+		ModuleName: hasher.Hash(rpo.Gomod.ModuleName),
+	}
 	return out, nil
 }
 

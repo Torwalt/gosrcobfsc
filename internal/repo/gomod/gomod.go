@@ -15,6 +15,10 @@ type GoMod struct {
 	ModuleName string
 }
 
+func (g GoMod) String() string {
+	return fmt.Sprintf("module %v\n\ngo %v", g.ModuleName, g.Version)
+}
+
 func NewGoMod(in string) (GoMod, error) {
 	if in == "" {
 		return GoMod{}, errors.New("no content in go.mod")

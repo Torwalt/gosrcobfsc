@@ -30,4 +30,11 @@ func TestNewGoMod(t *testing.T) {
 
 	require.NoError(t, err)
 	require.Equal(t, expGmd, gmd)
+
+	s := gmd.String()
+	require.NotEmpty(t, s)
+
+	newGmd, err := gomod.NewGoMod(testGomod)
+	require.NoError(t, err)
+	require.Equal(t, expGmd, newGmd)
 }
