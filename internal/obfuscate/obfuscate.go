@@ -67,7 +67,7 @@ func rename(pkg *ast.Package, moduleName string) {
 
 	for _, file := range v.ns.Files {
 		ic := renamer.NewImportChecker(file, moduleName)
-		fr := renamer.NewFileRenamer(pkg, file, ic)
+		fr := renamer.NewFileRenamer(file, ic)
 		fr.Rename()
 	}
 }

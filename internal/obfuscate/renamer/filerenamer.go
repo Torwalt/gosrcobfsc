@@ -13,14 +13,12 @@ const (
 )
 
 type FileRenamer struct {
-	pkg  *ast.Package
 	file *ast.File
 	ic   *ImportChecker
 }
 
-func NewFileRenamer(pkg *ast.Package, file *ast.File, ic *ImportChecker) *FileRenamer {
+func NewFileRenamer(file *ast.File, ic *ImportChecker) *FileRenamer {
 	return &FileRenamer{
-		pkg:  pkg,
 		file: file,
 		ic:   ic,
 	}
@@ -217,8 +215,19 @@ func (fr *FileRenamer) renameAssignStatement(in *ast.AssignStmt) {
 	}
 
 	for _, r := range in.Rhs {
-		fr.renameExpr(r)
+		fr.renameAssignment(r)
 	}
+}
+
+func (fr *FileRenamer) renameAssignment(in ast.Expr) {
+	switch t := in.(type) {
+	case *ast.Ident:
+		if isNonrenameableValue(t.Name) {
+			return
+		}
+	}
+
+	fr.renameExpr(in)
 }
 
 func (fr *FileRenamer) renameCallExpr(in *ast.CallExpr) {
@@ -249,7 +258,7 @@ func (fr *FileRenamer) renameSelectorExpr(in *ast.SelectorExpr) {
 func (fr *FileRenamer) isExternal(in *ast.SelectorExpr) bool {
 	switch t := in.X.(type) {
 	case *ast.Ident:
-		return fr.ic.IsExternalImport(t.Name)
+		return fr.ic.IsExternalPackage(t.Name)
 	}
 
 	return false
@@ -269,11 +278,15 @@ func (fr *FileRenamer) renameExpr(in ast.Expr) {
 		fr.renameSelectorExpr(t)
 	case *ast.StructType:
 		fr.renameStructType(t)
-		// TODO: Handle theses cases. One of it is literal strings, which will be
-		// hard to obfuscate without destroying actual formatting directives.
+
+	// TODO: Handle theses cases. One of it is literal strings, which will be
+	// hard to obfuscate without destroying actual formatting directives.
 	case *ast.BasicLit:
+
 	case *ast.StarExpr:
+		fr.renameStarExpr(t)
 	case *ast.UnaryExpr:
+		fr.renameUnaryExpr(t)
 	case *ast.CompositeLit:
 		fr.renameCompositeLit(t)
 	case *ast.KeyValueExpr:
@@ -297,6 +310,14 @@ func (fr *FileRenamer) renameExpr(in ast.Expr) {
 	default:
 		fmt.Printf("Found unhandled in renameExpr: %v\n", t)
 	}
+}
+
+func (fr *FileRenamer) renameStarExpr(in *ast.StarExpr) {
+	fr.renameTypeExpr(in.X)
+}
+
+func (fr *FileRenamer) renameUnaryExpr(in *ast.UnaryExpr) {
+	fr.renameExpr(in.X)
 }
 
 func (fr *FileRenamer) renameMapType(in *ast.MapType) {
@@ -339,7 +360,7 @@ func (fr *FileRenamer) renameFuncLit(in *ast.FuncLit) {
 
 func (fr *FileRenamer) renameArrayType(in *ast.ArrayType) {
 	fr.renameExpr(in.Len)
-	fr.renameExpr(in.Elt)
+	fr.renameTypeExpr(in.Elt)
 }
 
 func (fr *FileRenamer) renameKeyValueExpr(in *ast.KeyValueExpr) {
@@ -371,6 +392,10 @@ func (fr *FileRenamer) renameIdent(in *ast.Ident) {
 	}
 
 	if in.Name == "nil" {
+		return
+	}
+
+	if in.Name == "_" {
 		return
 	}
 

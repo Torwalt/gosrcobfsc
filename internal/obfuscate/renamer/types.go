@@ -42,7 +42,16 @@ func isNonrenameableType(in string) bool {
 		return true
 	case "error":
 		return true
-	case "nil":
+	default:
+		return false
+	}
+}
+
+func isNonrenameableValue(in string) bool {
+	switch in {
+	case "true":
+		return true
+	case "false":
 		return true
 	default:
 		return false

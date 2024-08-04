@@ -10,35 +10,51 @@ import (
 	"github.com/Torwalt/gosrcobfsc/internal/paths"
 )
 
-type importPath = string
+type (
+	importPath  = string
+	packageName = string
+)
+
+type imprt struct {
+	fullPath    importPath
+	packageName packageName
+}
 
 type ImportChecker struct {
 	externalImports  map[importPath]struct{}
-	internalImports  map[importPath]struct{}
+	externalPkgs     map[packageName]struct{}
 	moduleName       string
 	hashedModuleName string
 }
 
 func NewImportChecker(file *ast.File, moduleName string) *ImportChecker {
-	exImp := make(map[string]struct{})
-	inImp := make(map[string]struct{})
+	exImp := make(map[importPath]struct{})
+	exPkgs := make(map[packageName]struct{})
 
 	for _, f := range file.Imports {
 		path := cleanImportString(f.Path.Value)
 		if strings.Contains(path, moduleName) {
-			inImp[path] = struct{}{}
 			continue
 		}
 
+		pkg := filepath.Base(path)
+
+		exPkgs[pkg] = struct{}{}
 		exImp[path] = struct{}{}
 	}
 
 	return &ImportChecker{
 		externalImports:  exImp,
-		internalImports:  inImp,
+		externalPkgs:     exPkgs,
 		moduleName:       moduleName,
 		hashedModuleName: hasher.Hash(moduleName),
 	}
+}
+
+func (ic *ImportChecker) IsExternalPackage(in string) bool {
+	_, isExternal := ic.externalPkgs[in]
+
+	return isExternal
 }
 
 func (ic *ImportChecker) IsExternalImport(in string) bool {

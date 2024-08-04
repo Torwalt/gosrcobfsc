@@ -19,6 +19,7 @@ package main
 import (
 	"flag"
 	"log"
+    "go/format"
 
 	"github.com/Torwalt/gosrcobfsc/internal/args"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
@@ -92,6 +93,10 @@ func TestNewImportChecker(t *testing.T) {
 			isExternal: true,
 		},
 		{
+			path:       "go/format",
+			isExternal: true,
+		},
+		{
 			path:       "github.com/Torwalt/gosrcobfsc/internal/args",
 			isExternal: false,
 		},
@@ -117,6 +122,36 @@ func TestNewImportChecker(t *testing.T) {
 		res := ic.HashImport(p)
 		exp := "ddbggbhbcdbbaccffcbdbcijgabaacdfaiefdbcdagfbeaeeieccfjecahgaeiibXXX/dbedccbdadacfhbgaiefeaiecaccgicdffcaecgjhgddfecfeffcicjgfgbcafefXXX/ahbcaccchhfehafidhaadefjheiedfjejfiaabffdhgfcecfdjbaecbcchbcgdfeXXX"
 		assert.Equal(t, exp, res)
+	})
+
+	t.Run("Test IsExternalPackage", func(t *testing.T) {
+		isExternalImportTests := []struct {
+			path       string
+			isExternal bool
+		}{
+			{
+				path:       "flag",
+				isExternal: true,
+			},
+			{
+				path:       "log",
+				isExternal: true,
+			},
+			{
+				path:       "format",
+				isExternal: true,
+			},
+			{
+				path:       "args",
+				isExternal: false,
+			},
+		}
+		for _, tt := range isExternalImportTests {
+			t.Run(fmt.Sprintf("Test with path: %v", tt.path), func(t *testing.T) {
+				isExternal := ic.IsExternalPackage(tt.path)
+				assert.Equal(t, tt.isExternal, isExternal)
+			})
+		}
 	})
 }
 
