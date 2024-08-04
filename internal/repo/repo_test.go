@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	thisRepoFullPath = "/home/ada/repos/gosrcobfsc/"
+	thisRepoFullPath = "/home/ada/repos/gosrcobfsc"
 	moduleName       = "github.com/Torwalt/gosrcobfsc"
 	sink             = filepath.Join(thisRepoFullPath, "tests")
 )

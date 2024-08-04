@@ -67,6 +67,10 @@ func NewFromFilePath(path string) (GitIgnore, error) {
 }
 
 func (gi *GitIgnore) PathExcluded(path string) bool {
+	if strings.Contains(path, gitDir) {
+		return true
+	}
+
 	path = gi.cutPrefix(path)
 
 	// Maybe its just a literal so we do not have to iterate over everything.

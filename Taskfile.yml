@@ -24,7 +24,7 @@ tasks:
       - task: build
       - cmd: echo "Deleting previous test run."
       - cmd: find ./tests -mindepth 1 ! -name '.gitkeep' -delete
-      - cmd: ./{{.BINARY_NAME}} --moduleName=github.com/Torwalt/gosrcobfsc --source=/home/ada/repos/gosrcobfsc --sink=/home/ada/repos/gosrcobfsc/tests
+      - cmd: ./{{.BINARY_NAME}} --source=/home/ada/repos/gosrcobfsc --sink=/home/ada/repos/gosrcobfsc/tests
       - cmd: echo "Building project in obfuscated directory."
       - cmd: (cd /home/ada/repos/gosrcobfsc/tests && go build ./{{.HASHED_CMD}}/{{.HASHED_MAIN}})
       - cmd: echo "Running tests in obfuscated directory."
