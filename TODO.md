@@ -13,5 +13,6 @@ func (op *ObfuscatedPackage) SomeMethod() {
 ```
 
 - how to hash op, Expr but not MatchString?
+  - look into `Info     *types.Info` and WIP example parsing in internal/repo/repo.go
 
 - remove all comments
