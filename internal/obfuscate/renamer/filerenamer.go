@@ -96,6 +96,7 @@ func (fr *FileRenamer) renameFunc(in *ast.FuncDecl) {
 		fr.renameIdent(in.Name)
 	}
 
+	fr.renameFieldList(in.Recv)
 	fr.renameFuncType(in.Type)
 	fr.renameBlockStmt(in.Body)
 }
@@ -186,6 +187,13 @@ func (fr *FileRenamer) renameRangeStmt(in *ast.RangeStmt) {
 
 func (fr *FileRenamer) renameExprList(in []ast.Expr) {
 	for _, r := range in {
+		switch t := r.(type) {
+		case *ast.Ident:
+			if isNonrenameableValue(t.Name) {
+				return
+			}
+		}
+
 		fr.renameExpr(r)
 	}
 }
@@ -235,10 +243,21 @@ func (fr *FileRenamer) renameCallExpr(in *ast.CallExpr) {
 		return
 	}
 
-	fr.renameExpr(in.Fun)
+	fr.renameFuncCallExp(in.Fun)
 	for _, a := range in.Args {
 		fr.renameExpr(a)
 	}
+}
+
+func (fr *FileRenamer) renameFuncCallExp(in ast.Expr) {
+	switch t := in.(type) {
+	case *ast.Ident:
+		if isNonrenameableFuncCall(t.Name) {
+			return
+		}
+	}
+
+	fr.renameExpr(in)
 }
 
 func (fr *FileRenamer) renameSelectorExpr(in *ast.SelectorExpr) {

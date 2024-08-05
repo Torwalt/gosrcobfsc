@@ -57,3 +57,16 @@ func isNonrenameableValue(in string) bool {
 		return false
 	}
 }
+
+func isNonrenameableFuncCall(in string) bool {
+	if isNonrenameableType(in) {
+		return true
+	}
+
+	switch in {
+	case "append":
+		return true
+	default:
+		return false
+	}
+}

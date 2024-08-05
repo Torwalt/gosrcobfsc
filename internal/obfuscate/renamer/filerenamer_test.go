@@ -21,14 +21,26 @@ import (
 	"github.com/Torwalt/gosrcobfsc/internal/repo"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate/renamer"
 	"go/format"
+	"regexp"
 )
 
 type ObfuscatedPackage struct {
 	Package         *repo.Package
 	ObfuscatedPath  renamer.ObfuscatedPath
+    Expr *regexp.Regexp
+}
+
+func (op *ObfuscatedPackage) SomeMethod() {
+    op.Expr.MatchString("asd")
 }
 
 func aFunc(in string) int {
+    if true == true {
+        return true
+    }
+
+    z := string("")
+
     if err := format.Node(nil, nil, nil); err != nil {
         return err
     }
