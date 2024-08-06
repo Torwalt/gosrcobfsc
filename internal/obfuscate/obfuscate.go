@@ -2,6 +2,7 @@ package obfuscate
 
 import (
 	"go/ast"
+	"go/types"
 
 	"github.com/Torwalt/gosrcobfsc/internal/hasher"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate/renamer"
@@ -29,7 +30,7 @@ func Obfuscate(rpo repo.Repository) (ObfuscatedRepository, error) {
 
 	for _, pkgs := range rpo.Packages {
 		for _, pkg := range pkgs.PkgMap {
-			rename(pkg, rpo.Gomod.ModuleName)
+			rename(pkg, rpo.Gomod.ModuleName, pkgs.Info)
 		}
 		ops = append(ops, NewObfuscatedPackage(pkgs, rpo.Path))
 	}
@@ -61,13 +62,11 @@ func NewObfuscatedPackage(repoPkg *repo.Package, repoPath string) ObfuscatedPack
 	}
 }
 
-func rename(pkg *ast.Package, moduleName string) {
-	v := NewVisitor()
-	ast.Walk(v, pkg)
-
-	for _, file := range v.ns.Files {
+func rename(pkg *ast.Package, moduleName string, i *types.Info) {
+	tc := renamer.NewTypeChecker(i)
+	for _, file := range pkg.Files {
 		ic := renamer.NewImportChecker(file, moduleName)
-		fr := renamer.NewFileRenamer(file, ic)
+		fr := renamer.NewFileRenamer(file, ic, tc)
 		fr.Rename()
 	}
 }

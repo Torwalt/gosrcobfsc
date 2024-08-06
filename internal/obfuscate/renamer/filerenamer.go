@@ -15,12 +15,14 @@ const (
 type FileRenamer struct {
 	file *ast.File
 	ic   *ImportChecker
+	tc   *TypeChecker
 }
 
-func NewFileRenamer(file *ast.File, ic *ImportChecker) *FileRenamer {
+func NewFileRenamer(file *ast.File, ic *ImportChecker, tc *TypeChecker) *FileRenamer {
 	return &FileRenamer{
 		file: file,
 		ic:   ic,
+		tc:   tc,
 	}
 }
 
@@ -408,6 +410,13 @@ func (fr *FileRenamer) renameTypeExpr(in ast.Expr) {
 func (fr *FileRenamer) renameIdent(in *ast.Ident) {
 	if in == nil {
 		return
+	}
+
+	if pkg := fr.tc.Package(in); pkg != nil {
+		p := pkg.Path()
+		if !fr.ic.HasModuleName(p) {
+			return
+		}
 	}
 
 	if in.Name == "nil" {

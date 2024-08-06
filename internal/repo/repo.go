@@ -50,29 +50,21 @@ func NewRepository(dirs Dirs, repoPath string) (Repository, error) {
 		return Repository{}, errors.New(fmt.Sprintf("could not parse gomod file in given path: %v", err))
 	}
 
+	// Probably can run processing of p in goroutines.
 	for _, p := range pkgs {
 		config := &types.Config{
-			Importer: importer.For("source", nil),
+			Importer: importer.ForCompiler(p.Fset, "source", nil),
 		}
-		for pkgName, sp := range p.PkgMap {
-			if pkgName == "main" {
-				continue
-			}
-
-			if strings.HasSuffix(pkgName, "_test") {
-				continue
-			}
-
-			files := []*ast.File{}
+		for _, sp := range p.PkgMap {
+			files := make([]*ast.File, 0, len(sp.Files))
 			for _, f := range sp.Files {
 				files = append(files, f)
 			}
 
-			x, _ := strings.CutPrefix(p.FullPath, repoPath)
-			path := filepath.Join(gmd.ModuleName, x)
+			pkgPath, _ := strings.CutPrefix(p.FullPath, repoPath)
+			path := filepath.Join(gmd.ModuleName, pkgPath)
 
-			_, err := config.Check(path, p.Fset, files, p.Info)
-			if err != nil {
+			if _, err := config.Check(path, p.Fset, files, p.Info); err != nil {
 				return Repository{}, err
 			}
 		}

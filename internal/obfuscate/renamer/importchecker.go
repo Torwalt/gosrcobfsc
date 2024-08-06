@@ -50,6 +50,9 @@ func NewImportChecker(file *ast.File, moduleName string) *ImportChecker {
 		hashedModuleName: hasher.Hash(moduleName),
 	}
 }
+func (ic *ImportChecker) HasModuleName(path string) bool {
+	return strings.HasPrefix(path, ic.moduleName)
+}
 
 func (ic *ImportChecker) IsExternalPackage(in string) bool {
 	_, isExternal := ic.externalPkgs[in]

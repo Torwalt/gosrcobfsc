@@ -3,9 +3,13 @@ package renamer_test
 import (
 	"bytes"
 	"fmt"
+	"go/ast"
 	"go/format"
+	"go/importer"
 	"go/parser"
 	"go/token"
+	"go/types"
+	"path/filepath"
 	"testing"
 
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate/renamer"
@@ -16,44 +20,15 @@ var testFile = `
 package main
 
 import (
-    "fmt"
-	"github.com/Torwalt/gosrcobfsc/obfuscating"
-	"github.com/Torwalt/gosrcobfsc/internal/repo"
-	"github.com/Torwalt/gosrcobfsc/internal/obfuscate/renamer"
-	"go/format"
 	"regexp"
 )
 
 type ObfuscatedPackage struct {
-	Package         *repo.Package
-	ObfuscatedPath  renamer.ObfuscatedPath
     Expr *regexp.Regexp
 }
 
 func (op *ObfuscatedPackage) SomeMethod() {
     op.Expr.MatchString("asd")
-}
-
-func aFunc(in string) int {
-    if true == true {
-        return true
-    }
-
-    z := string("")
-
-    if err := format.Node(nil, nil, nil); err != nil {
-        return err
-    }
-
-    x := 1
-
-    ok := true
-    if !ok {
-    }
-
-    y := []string{}
-
-	return 0
 }
 `
 
@@ -62,8 +37,20 @@ func TestFileRenamer(t *testing.T) {
 	f, err := parser.ParseFile(fset, "", testFile, 0)
 	require.NoError(t, err)
 
+	info := &types.Info{
+		Uses: make(map[*ast.Ident]types.Object),
+	}
+	config := &types.Config{
+		Importer: importer.ForCompiler(fset, "source", nil),
+	}
+
+	path := filepath.Join(moduleName, "cmd")
+	_, err = config.Check(path, fset, []*ast.File{f}, info)
+	require.NoError(t, err)
+
+	tc := renamer.NewTypeChecker(info)
 	ic := renamer.NewImportChecker(f, moduleName)
-	fr := renamer.NewFileRenamer(f, ic)
+	fr := renamer.NewFileRenamer(f, ic, tc)
 
 	buf := []byte{}
 	bb := bytes.NewBuffer(buf)
