@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"log"
+	"time"
 
 	"github.com/Torwalt/gosrcobfsc/internal/args"
 	"github.com/Torwalt/gosrcobfsc/internal/obfuscate"
@@ -12,6 +13,7 @@ import (
 )
 
 func main() {
+	start := time.Now()
 	moduleNameFlag := flag.String("moduleName", "", "The name of the module (top of go.mod).")
 	sourceFlag := flag.String("source", "", "The full path of the source repository.")
 	sinkFlag := flag.String("sink", "", "The full path where to write obfuscated directory.")
@@ -26,6 +28,7 @@ func main() {
 	if err := run(args); err != nil {
 		log.Fatalf("%v", err)
 	}
+	log.Printf("Run took: %v", time.Since(start))
 }
 
 func run(a args.Args) error {
