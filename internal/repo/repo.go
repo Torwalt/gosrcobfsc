@@ -10,6 +10,7 @@ import (
 	"go/types"
 	"path/filepath"
 	"strings"
+	"sync"
 
 	"github.com/Torwalt/gosrcobfsc/internal/repo/gomod"
 )
@@ -40,7 +41,7 @@ func NewRepository(dirs Dirs, repoPath string) (Repository, error) {
 			FullPath: dir,
 			PkgMap:   pkgMap,
 			Info: &types.Info{
-				Uses: make(map[*ast.Ident]types.Object),
+				Uses: make(map[*ast.Ident]types.Object, 1000),
 			},
 		})
 	}
@@ -50,25 +51,31 @@ func NewRepository(dirs Dirs, repoPath string) (Repository, error) {
 		return Repository{}, errors.New(fmt.Sprintf("could not parse gomod file in given path: %v", err))
 	}
 
-	// Probably can run processing of p in goroutines.
+	wg := sync.WaitGroup{}
+	wg.Add(len(pkgs))
 	for _, p := range pkgs {
-		config := &types.Config{
-			Importer: importer.ForCompiler(p.Fset, "source", nil),
-		}
-		for _, sp := range p.PkgMap {
-			files := make([]*ast.File, 0, len(sp.Files))
-			for _, f := range sp.Files {
-				files = append(files, f)
-			}
+		go func() {
+			defer wg.Done()
 
-			pkgPath, _ := strings.CutPrefix(p.FullPath, repoPath)
-			path := filepath.Join(gmd.ModuleName, pkgPath)
-
-			if _, err := config.Check(path, p.Fset, files, p.Info); err != nil {
-				return Repository{}, err
+			config := &types.Config{
+				Importer: importer.ForCompiler(p.Fset, "source", nil),
 			}
-		}
+			for _, sp := range p.PkgMap {
+				files := make([]*ast.File, 0, len(sp.Files))
+				for _, f := range sp.Files {
+					files = append(files, f)
+				}
+
+				pkgPath, _ := strings.CutPrefix(p.FullPath, repoPath)
+				path := filepath.Join(gmd.ModuleName, pkgPath)
+
+				if _, err := config.Check(path, p.Fset, files, p.Info); err != nil {
+					panic(err)
+				}
+			}
+		}()
 	}
+	wg.Wait()
 
 	return Repository{
 		Packages: pkgs,
