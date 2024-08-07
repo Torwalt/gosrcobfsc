@@ -1,4 +1,4 @@
 - remove all comments
-- handle more cases
-- how to repo.NewRepository faster?
+- handle more cases from other repositories
 - maybe look into refactoring repo.Package to not use ast.Package
+
