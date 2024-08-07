@@ -20,15 +20,24 @@ var testFile = `
 package main
 
 import (
-	"regexp"
+	"go/types"
+	"sync"
 )
 
-type ObfuscatedPackage struct {
-    Expr *regexp.Regexp
-}
+func asd() {
+	numbers := [][]int{}
 
-func (op *ObfuscatedPackage) SomeMethod() {
-    op.Expr.MatchString("asd")
+	wg := sync.WaitGroup{}
+	for _, n := range numbers {
+		go func() {
+			defer wg.Done()
+
+			_ = &types.Config{}
+			for _, sp := range n {
+				print(sp)
+			}
+		}()
+	}
 }
 `
 

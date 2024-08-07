@@ -133,9 +133,21 @@ func (fr *FileRenamer) renameStmt(in ast.Stmt) {
 		fr.renameTypeSwitchStmt(t)
 	case *ast.BranchStmt:
 		fr.renameBranchStmt(t)
+	case *ast.GoStmt:
+		fr.renameGoStmt(t)
+	case *ast.DeferStmt:
+		fr.renameDeferStmt(t)
 	default:
 		fmt.Printf("Found unhandled in renameStmt: %v\n", t)
 	}
+}
+
+func (fr *FileRenamer) renameDeferStmt(in *ast.DeferStmt) {
+	fr.renameCallExpr(in.Call)
+}
+
+func (fr *FileRenamer) renameGoStmt(in *ast.GoStmt) {
+	fr.renameCallExpr(in.Call)
 }
 
 func (fr *FileRenamer) renameBranchStmt(in *ast.BranchStmt) {
@@ -386,7 +398,7 @@ func (fr *FileRenamer) renameArrayType(in *ast.ArrayType) {
 
 func (fr *FileRenamer) renameKeyValueExpr(in *ast.KeyValueExpr) {
 	fr.renameExpr(in.Key)
-	fr.renameExpr(in.Value)
+	fr.renameAssignment(in.Value)
 }
 
 func (fr *FileRenamer) renameCompositeLit(in *ast.CompositeLit) {

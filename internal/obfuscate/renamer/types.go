@@ -66,6 +66,14 @@ func isNonrenameableFuncCall(in string) bool {
 	switch in {
 	case "append":
 		return true
+	case "len":
+		return true
+	case "make":
+		return true
+	case "panic":
+		return true
+	case "print":
+		return true
 	default:
 		return false
 	}
